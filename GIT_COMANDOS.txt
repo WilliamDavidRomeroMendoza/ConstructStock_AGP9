@@ -1,0 +1,14 @@
+COMANDOS PARA SUBIR A GITHUB
+
+1. Abre la terminal dentro de la carpeta del proyecto.
+
+2. Ejecuta:
+
+git init
+git add .
+git commit -m "Proyecto ConstructStock"
+git branch -M main
+git remote add origin URL_DE_TU_REPOSITORIO
+git push -u origin main
+
+Reemplaza URL_DE_TU_REPOSITORIO por el enlace de tu repositorio GitHub.
