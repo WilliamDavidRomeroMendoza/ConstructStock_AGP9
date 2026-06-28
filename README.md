@@ -194,6 +194,16 @@ Saint Leo University
 - Agregar reportes.
 - Implementar respaldo en la nube.
 
+## Versión 1.0 - Entrega final
+
+* Se completó la aplicación ConstructStock.
+* Se consolidó el inventario general de herramientas y materiales.
+* Se mantuvo el registro de entradas y salidas de productos.
+* Se implementó el historial de movimientos del inventario.
+* Se agregó el reporte de productos con stock bajo.
+* Se actualizó la documentación final del proyecto.
+* Se preparó el proyecto para la entrega final en GitHub.
+
 # Repositorio del proyecto
 
 https://github.com/WilliamDavidRomeroMendoza/ConstructStock_AGP9
