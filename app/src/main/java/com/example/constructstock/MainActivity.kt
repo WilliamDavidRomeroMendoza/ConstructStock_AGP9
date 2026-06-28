@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -172,6 +173,27 @@ class InventoryDb(context: Context) : SQLiteOpenHelper(context, "construct_stock
         }
     }
 
+
+    fun totalProducts(): Int {
+        return products().size
+    }
+
+    fun totalByCategory(category: String): Int {
+        return products(category = category).size
+    }
+
+    fun totalStock(): Int {
+        return products().sumOf { it.stock }
+    }
+
+    fun lowStockCount(): Int {
+        return products().count { it.stock <= it.minStock }
+    }
+
+    fun movementCount(type: String): Int {
+        return movements().count { it.type == type }
+    }
+
     fun movements(): List<Movement> {
         val list = mutableListOf<Movement>()
         val cursor = readableDatabase.query("movements", null, null, null, null, null, "id DESC")
@@ -200,7 +222,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         db = InventoryDb(this)
-        showHome()
+        showLogin()
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
@@ -226,7 +248,9 @@ class MainActivity : AppCompatActivity() {
         return Button(this).apply {
             this.text = text
             textSize = 16f
-            setPadding(dp(8), dp(8), dp(8), dp(8))
+            setTextColor(Color.WHITE)
+            setBackgroundColor(Color.rgb(21, 96, 130))
+            setPadding(dp(8), dp(10), dp(8), dp(10))
             setOnClickListener { onClick() }
         }
     }
@@ -238,6 +262,48 @@ class MainActivity : AppCompatActivity() {
             setTextColor(color)
             setPadding(0, dp(4), 0, dp(4))
         }
+    }
+
+
+    private fun showLogin() {
+        val root = base("ConstructStock")
+        root.addView(label("Inicio de sesión", 20f, Color.rgb(21, 96, 130)))
+        root.addView(label("Ingrese sus credenciales para administrar el inventario.", 14f, Color.GRAY))
+        root.addView(space())
+
+        val user = EditText(this).apply {
+            hint = "Usuario"
+            setSingleLine(true)
+        }
+
+        val password = EditText(this).apply {
+            hint = "Contraseña"
+            setSingleLine(true)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
+
+        root.addView(label("Usuario"))
+        root.addView(user)
+        root.addView(label("Contraseña"))
+        root.addView(password)
+        root.addView(space())
+
+        root.addView(button("Ingresar") {
+            val username = user.text.toString().trim()
+            val pass = password.text.toString().trim()
+
+            if (username == "admin" && pass == "1234") {
+                toast("Bienvenido a ConstructStock")
+                showHome()
+            } else {
+                toast("Usuario o contraseña incorrectos")
+            }
+        })
+
+        root.addView(space())
+        root.addView(label("Usuario: admin | Contraseña: 1234", 13f, Color.GRAY))
+
+        setContentView(root)
     }
 
     private fun showHome() {
@@ -252,7 +318,9 @@ class MainActivity : AppCompatActivity() {
         root.addView(button("⬆ Registrar entrada") { showMovementScreen("Entrada") })
         root.addView(button("⬇ Registrar salida") { showMovementScreen("Salida") })
         root.addView(button("📋 Historial de movimientos") { showHistory() })
+        root.addView(button("📊 Reporte general") { showGeneralReport() })
         root.addView(button("⚠ Reporte de stock bajo") { showLowStock() })
+        root.addView(button("🚪 Cerrar sesión") { showLogin() })
         setContentView(root)
     }
 
@@ -284,10 +352,10 @@ class MainActivity : AppCompatActivity() {
             products.forEach { product -> listContainer.addView(productCard(product, category)) }
         }
         scroll.addView(listContainer)
-        
+
         val scrollParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f)
         root.addView(scroll, scrollParams)
-        
+
         setContentView(root)
     }
 
@@ -348,6 +416,10 @@ class MainActivity : AppCompatActivity() {
                 val qty = stock.text.toString().toIntOrNull() ?: 0
                 val min = minStock.text.toString().toIntOrNull() ?: 1
                 val loc = location.text.toString().ifBlank { "Almacén" }
+                if (qty < 0 || min < 0) {
+                    toast("El stock y el stock mínimo no pueden ser negativos")
+                    return@setPositiveButton
+                }
                 if (product == null) {
                     db.addProduct(pName, category.selectedItem.toString(), qty, loc, min)
                 } else {
@@ -405,12 +477,38 @@ class MainActivity : AppCompatActivity() {
         setContentView(root)
     }
 
+
+    private fun showGeneralReport() {
+        val root = base("Reporte general")
+        root.addView(label("Resumen automático del inventario", 20f, Color.rgb(21, 96, 130)))
+        root.addView(space())
+
+        root.addView(label("Total de productos: ${db.totalProducts()}", 17f, Color.DKGRAY))
+        root.addView(label("Herramientas registradas: ${db.totalByCategory("Herramienta")}", 17f, Color.DKGRAY))
+        root.addView(label("Materiales registrados: ${db.totalByCategory("Material")}", 17f, Color.DKGRAY))
+        root.addView(label("Stock total acumulado: ${db.totalStock()}", 17f, Color.DKGRAY))
+        root.addView(label("Productos con stock bajo: ${db.lowStockCount()}", 17f, Color.rgb(190, 50, 40)))
+
+        root.addView(space())
+        root.addView(label("Movimientos registrados", 20f, Color.rgb(21, 96, 130)))
+        root.addView(label("Total de entradas: ${db.movementCount("Entrada")}", 17f, Color.DKGRAY))
+        root.addView(label("Total de salidas: ${db.movementCount("Salida")}", 17f, Color.DKGRAY))
+
+        root.addView(space())
+        root.addView(button("Volver") { showHome() })
+
+        setContentView(root)
+    }
+
     private fun showHistory() {
         val root = base("Historial")
         root.addView(button("Volver") { showHome() })
         val scroll = ScrollView(this)
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val movements = db.movements()
+        root.addView(label("Total de movimientos: ${movements.size}", 16f, Color.DKGRAY))
+        root.addView(label("Entradas: ${movements.count { it.type == "Entrada" }}", 15f, Color.rgb(20, 130, 70)))
+        root.addView(label("Salidas: ${movements.count { it.type == "Salida" }}", 15f, Color.rgb(190, 50, 40)))
         if (movements.isEmpty()) {
             list.addView(label("Aún no hay movimientos registrados."))
         } else {
@@ -432,10 +530,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         scroll.addView(list)
-        
+
         val scrollParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f)
         root.addView(scroll, scrollParams)
-        
+
         setContentView(root)
     }
 
