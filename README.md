@@ -163,6 +163,37 @@ Saint Leo University
 
 ---
 
+# Changelog
+
+## Versión 0.1 - Proyecto inicial
+
+- Se creó la idea del proyecto ConstructStock.
+- Se definió el problema que resolverá la aplicación.
+- Se planteó el objetivo general y los objetivos específicos.
+- Se eligió Android como plataforma.
+- Se definieron las tecnologías Kotlin y SQLite.
+- Se diseñaron los primeros wireframes.
+
+## Versión 0.2 - Avances del proyecto
+
+- Se desarrolló la aplicación en Android Studio.
+- Se implementó la base de datos SQLite.
+- Se agregó el registro de herramientas y materiales.
+- Se implementó el inventario general.
+- Se agregó la búsqueda de productos.
+- Se implementó el registro de entradas y salidas.
+- Se agregó el historial de movimientos.
+- Se implementó el reporte de stock bajo.
+- Se publicó el proyecto en GitHub.
+- Se actualizó el README.
+
+## Próximos cambios
+
+- Agregar inicio de sesión.
+- Mejorar el diseño de la aplicación.
+- Agregar reportes.
+- Implementar respaldo en la nube.
+
 # Repositorio del proyecto
 
 https://github.com/WilliamDavidRomeroMendoza/ConstructStock_AGP9
